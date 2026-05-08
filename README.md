@@ -3,6 +3,10 @@
 > **사진 한 장이면 충분합니다.** 어지러운 방 사진을 올리면, 정리된 미래 모습과 **딱 3분짜리 정리 미션**을 알려드려요.
 
 <p align="center">
+  <a href="https://clean-dori.replit.app/"><b>🌐 라이브 데모 바로가기 →  clean-dori.replit.app</b></a>
+</p>
+
+<p align="center">
   <img src="attached_assets/readme/screenshot-home.jpg" alt="CleanDori 홈 화면" width="720" />
 </p>
 
@@ -91,26 +95,43 @@ Clean-Dori/
 
 ## 🚀 직접 실행해보고 싶다면
 
-> 이 프로젝트는 [Replit](https://replit.com) 환경에 맞춰져 있어요. Replit에서 열면 위 앱들이 자동으로 실행됩니다.
+> 💡 **가장 쉬운 방법은 라이브 사이트에서 바로 체험하는 거예요 →** [https://clean-dori.replit.app/](https://clean-dori.replit.app/)
+>
+> 라이브 사이트는 Replit 환경에서 AI 키·DB·서비스 라우팅이 자동으로 묶여서 동작합니다.
 
-로컬에서 돌려본다면:
+### 옵션 A. Replit에서 바로 열기 (권장)
+
+1. 이 저장소를 Replit으로 import 합니다.
+2. 아래 시크릿을 Replit Secrets에 등록하세요. **이게 없으면 AI 기능이 동작하지 않습니다.**
+
+   | 시크릿 이름 | 용도 | 없으면? |
+   | --- | --- | --- |
+   | `DATABASE_URL` | PostgreSQL 연결 (Replit DB 자동 제공) | API 일부 동작 안 함 |
+   | `ANTHROPIC_API_KEY` | Claude로 방 사진 분석 + 미션 생성 | "Mock 분석" 으로 폴백 |
+   | `AI_INTEGRATIONS_OPENAI_API_KEY` <br/>+ `AI_INTEGRATIONS_OPENAI_BASE_URL` | OpenAI로 정리된 After 이미지 생성 | After 이미지가 데모 사진으로 폴백 |
+   | `GEMINI_API_KEY` *(대체)* | Gemini로 After 이미지 생성 | (위 OpenAI가 있으면 불필요) |
+
+3. Replit이 워크플로우(메인 앱 / 슬라이드 / API 서버)를 자동 실행합니다.
+
+### 옵션 B. 로컬에서 실행 (수동 설정 필요)
 
 ```bash
 # 1. 패키지 설치
 pnpm install
 
-# 2. (선택) DB 연결 정보 설정
+# 2. 시크릿/환경변수 설정
 export DATABASE_URL="postgresql://..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+export AI_INTEGRATIONS_OPENAI_API_KEY="sk-..."
+export AI_INTEGRATIONS_OPENAI_BASE_URL="https://api.openai.com/v1"
 
-# 3. 메인 웹 앱 실행
-pnpm --filter @workspace/cleandori run dev
-
-# 4. 슬라이드 덱 실행
-pnpm --filter @workspace/cleandori-deck run dev
-
-# 5. API 서버 실행
-pnpm --filter @workspace/api-server run dev
+# 3. 각각 다른 터미널에서 실행
+pnpm --filter @workspace/api-server run dev    # 백엔드 API
+pnpm --filter @workspace/cleandori run dev     # 메인 웹 앱
+pnpm --filter @workspace/cleandori-deck run dev # 슬라이드 덱
 ```
+
+⚠️ **주의:** 로컬 실행 시 프론트엔드는 `/api/...` 경로로 백엔드를 호출합니다. Replit 환경 밖에서는 두 서버 사이의 경로 라우팅을 직접 맞춰줘야 합니다 (리버스 프록시 또는 dev 프록시 설정). 그래서 가능하면 **옵션 A를 권장**합니다.
 
 전체 타입 검사:
 
@@ -120,9 +141,14 @@ pnpm run typecheck
 
 ---
 
-## 💡 데모 모드로 바로 체험하기
+## 💡 시크릿 없이도 체험하는 방법: 데모 모드
 
-API 키 없이도 어떻게 동작하는지 보고 싶다면, 메인 화면에서 **`Presentation Demo Mode`** 버튼을 눌러보세요. 미리 준비된 사진과 미션으로 전체 흐름을 둘러볼 수 있습니다.
+API 키를 하나도 설정하지 않아도, 메인 화면의 **`Presentation Demo Mode`** 버튼을 누르면 미리 준비된 사진·분석 결과·미션으로 **전체 사용자 흐름을 둘러볼 수 있습니다.** 라이브 사이트에서도 데모 버튼이 같은 역할을 해요.
+
+| 모드 | 사진 분석 | After 이미지 | 미션 |
+| --- | --- | --- | --- |
+| 데모 모드 | 미리 작성된 분석 | 준비된 After 사진 | 5개 컨디션별 정해진 미션 |
+| 실제 모드 (라이브 사이트) | Claude AI 호출 | OpenAI/Gemini AI 생성 | Claude AI 생성 |
 
 ---
 
