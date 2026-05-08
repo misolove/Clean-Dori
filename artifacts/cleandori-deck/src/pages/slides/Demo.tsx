@@ -13,7 +13,7 @@ export default function Demo() {
             Live Demo
           </span>
         </div>
-        <div className="uppercase tracking-[0.15em]">cleandori · 04 / 06</div>
+        <div className="uppercase tracking-[0.15em]">cleandori · 04 / 07</div>
       </div>
 
       <div className="absolute top-[12vh] left-[5vw] right-[5vw]">
@@ -80,7 +80,7 @@ export default function Demo() {
             완벽한 인테리어가 아닙니다. 첫 행동을 위한 한 장면입니다.
           </div>
           <div className="text-ink font-bold uppercase tracking-[0.15em]">
-            mock preview · production: gemini
+            live: openai gpt-image-1 · safe fallback: mock
           </div>
         </div>
       </div>

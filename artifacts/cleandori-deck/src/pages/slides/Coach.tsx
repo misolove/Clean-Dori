@@ -10,7 +10,7 @@ export default function Coach() {
             Dual Coach + Safety
           </span>
         </div>
-        <div className="uppercase tracking-[0.15em]">cleandori · 05 / 06</div>
+        <div className="uppercase tracking-[0.15em]">cleandori · 05 / 07</div>
       </div>
 
       <div className="absolute left-[5vw] right-[5vw] top-[14vh]">
@@ -93,7 +93,7 @@ export default function Coach() {
             "가능한 실행 장벽" 표현만 사용 · 진단 언어 사용 금지
           </div>
           <div className="text-ink font-bold uppercase tracking-[0.15em]">
-            tone · non-judgmental by default
+            live: claude sonnet 4.5 · structured json
           </div>
         </div>
       </div>

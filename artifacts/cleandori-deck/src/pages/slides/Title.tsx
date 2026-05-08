@@ -74,7 +74,7 @@ export default function Title() {
           </p>
           <div className="font-mono text-[1vw] text-muted text-right">
             <div className="font-bold text-ink">AI ORGANIZING COACH</div>
-            <div className="mt-[0.3vh]">PITCH · 01 / 06</div>
+            <div className="mt-[0.3vh]">PITCH · 01 / 07</div>
           </div>
         </div>
       </div>

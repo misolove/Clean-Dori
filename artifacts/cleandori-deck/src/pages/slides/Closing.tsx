@@ -30,7 +30,7 @@ export default function Closing() {
           cleandori.ai
         </div>
         <div className="font-mono text-[1vw] text-muted uppercase tracking-[0.15em]">
-          / closing · 06 / 06
+          / closing · 07 / 07
         </div>
       </div>
 
@@ -46,36 +46,36 @@ export default function Closing() {
 
       <div className="absolute left-[5vw] right-[5vw] bottom-[10vh] grid grid-cols-3 gap-[2vw]">
         <div>
-          <div className="font-mono text-[1vw] uppercase tracking-[0.15em] text-muted">
-            Today · Mock
+          <div className="font-mono text-[1vw] uppercase tracking-[0.15em]" style={{ color: "var(--slide-accent)" }}>
+            Today · Shipped
           </div>
           <div className="font-display text-[1.8vw] uppercase mt-[0.5vh] leading-[1.1]">
-            엔드투엔드 데모
+            두 AI 라이브 통합
           </div>
           <div className="font-mono text-[1.05vw] text-ink mt-[0.6vh] leading-[1.4]">
-            업로드 → 미리보기 → 3분 미션 흐름이 모두 동작합니다.
+            Claude 분석 + OpenAI 미리보기 + 비판단 코칭이 한 흐름에서 동작합니다.
           </div>
         </div>
         <div>
           <div className="font-mono text-[1vw] uppercase tracking-[0.15em] text-muted">
-            Next · Claude
+            Next · 2 weeks
           </div>
           <div className="font-display text-[1.8vw] uppercase mt-[0.5vh] leading-[1.1]">
-            방 분석 + 미션 생성
+            모바일 + 미션 히스토리
           </div>
           <div className="font-mono text-[1.05vw] text-ink mt-[0.6vh] leading-[1.4]">
-            현재 mock 함수 자리에 Claude를 그대로 끼웁니다.
+            카메라 바로 찍기, 회복한 구역의 누적 기록을 부드럽게 보여줍니다.
           </div>
         </div>
         <div>
           <div className="font-mono text-[1vw] uppercase tracking-[0.15em] text-muted">
-            Next · Gemini
+            Next · Scale
           </div>
           <div className="font-display text-[1.8vw] uppercase mt-[0.5vh] leading-[1.1]">
-            정리 후 미리보기 생성
+            동행자 모드 + 음성
           </div>
           <div className="font-mono text-[1.05vw] text-ink mt-[0.6vh] leading-[1.4]">
-            mock 미리보기 자리에 Gemini 이미지를 흘려보냅니다.
+            보호자·친구가 함께 시작하는 짧은 음성 동행, 안전 신호 알림.
           </div>
         </div>
       </div>

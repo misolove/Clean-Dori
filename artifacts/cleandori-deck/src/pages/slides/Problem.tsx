@@ -10,7 +10,7 @@ export default function Problem() {
             The Problem
           </span>
         </div>
-        <div className="uppercase tracking-[0.15em]">cleandori · 02 / 06</div>
+        <div className="uppercase tracking-[0.15em]">cleandori · 02 / 07</div>
       </div>
 
       <div className="absolute left-[5vw] right-[5vw] top-[18vh]">
