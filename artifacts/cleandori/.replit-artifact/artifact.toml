@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "클린돌이 CleanDori"
+version = "1.0.0"
+id = "artifacts/cleandori"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22670
+
+[services.development]
+run = "pnpm --filter @workspace/cleandori run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cleandori", "run", "build" ]
+publicDir = "artifacts/cleandori/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22670"
+BASE_PATH = "/"

@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Lg0TTjTN7W3P-utXiu3T3"
+uri = "file://artifacts/cleandori/src/assets/demo-before.png"
+type = "image"
+title = "Messy room demo before"
+
+[[generated]]
+id = "XPpKPDuuYVXeRGeGut3Qy"
+uri = "file://artifacts/cleandori/src/assets/demo-after.png"
+type = "image"
+title = "Clean room demo after"
