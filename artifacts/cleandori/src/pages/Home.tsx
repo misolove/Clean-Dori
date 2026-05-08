@@ -9,8 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import demoBefore from "@/assets/demo-before.png";
-import demoAfter from "@/assets/demo-after.png";
+import demoBefore from "@assets/brett-jordan-bSoV4nbrkzA-unsplash_1778236944319.jpg";
+import demoAfter from "@assets/a_tidy_softly_lit_interior_room_scene_viewed_stra_1778236956570.png";
 
 // Mock Architecture for API Swaps
 // NOTE: Claude (room analysis + mission) and Gemini (preview image) will plug in later. DO NOT implement real API calls here.
