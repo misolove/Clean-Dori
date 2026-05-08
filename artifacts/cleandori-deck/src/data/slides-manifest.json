@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "id": "5d2b6b8a-4f9c-4e3b-8a4f-1c0d11111111",
+    "position": 1,
+    "filepath": "src/pages/slides/Title.tsx",
+    "title": "Title",
+    "description": "CleanDori 타이틀 슬라이드",
+    "speakerNotes": ""
+  },
+  {
+    "id": "5d2b6b8a-4f9c-4e3b-8a4f-1c0d22222222",
+    "position": 2,
+    "filepath": "src/pages/slides/Problem.tsx",
+    "title": "Problem",
+    "description": "정리의 진짜 장벽은 시작 장벽",
+    "speakerNotes": ""
+  },
+  {
+    "id": "5d2b6b8a-4f9c-4e3b-8a4f-1c0d33333333",
+    "position": 3,
+    "filepath": "src/pages/slides/Solution.tsx",
+    "title": "Solution",
+    "description": "사진 → 미리보기 → 3분 미션",
+    "speakerNotes": ""
+  },
+  {
+    "id": "5d2b6b8a-4f9c-4e3b-8a4f-1c0d44444444",
+    "position": 4,
+    "filepath": "src/pages/slides/Demo.tsx",
+    "title": "Demo",
+    "description": "비포 / 애프터 미리보기",
+    "speakerNotes": ""
+  },
+  {
+    "id": "5d2b6b8a-4f9c-4e3b-8a4f-1c0d55555555",
+    "position": 5,
+    "filepath": "src/pages/slides/Coach.tsx",
+    "title": "Dual Coach + Safety",
+    "description": "듀얼 코치 분석 및 안전 원칙",
+    "speakerNotes": ""
+  },
+  {
+    "id": "5d2b6b8a-4f9c-4e3b-8a4f-1c0d66666666",
+    "position": 6,
+    "filepath": "src/pages/slides/Closing.tsx",
+    "title": "Closing",
+    "description": "마무리 및 향후 로드맵",
+    "speakerNotes": ""
+  }
+]

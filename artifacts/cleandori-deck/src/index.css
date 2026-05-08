@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-primary: var(--slide-primary);
+  --color-cream: var(--slide-cream);
+  --color-ink: var(--slide-ink);
   --color-accent: var(--slide-accent);
-  --color-bg: var(--slide-bg);
-  --color-text: var(--slide-text);
+  --color-sage: var(--slide-sage);
   --color-muted: var(--slide-muted);
   --font-display: var(--font-display-family);
   --font-body: var(--font-body-family);
+  --font-mono: var(--font-mono-family);
 }
 
 :root {
-  /* Replace these with brand colors */
-  --slide-primary: #4f46e5;
-  --slide-accent: #06b6d4;
-  --slide-bg: #f8fafc;
-  --slide-text: #0f172a;
-  --slide-muted: #64748b;
-  --font-display-family: "Inter", system-ui, sans-serif;
-  --font-body-family: "Inter", system-ui, sans-serif;
+  --slide-cream: #f0e8d6;
+  --slide-ink: #14110d;
+  --slide-accent: #d83a3a;
+  --slide-sage: #6b7d57;
+  --slide-muted: #574f43;
+  --font-display-family: "Archivo Black", "Archivo", sans-serif;
+  --font-body-family: "Archivo", sans-serif;
+  --font-mono-family: "JetBrains Mono", monospace;
   color-scheme: light;
 }
 
@@ -31,8 +32,9 @@ body,
 }
 
 body {
-  background: var(--slide-bg);
-  color: var(--slide-text);
+  background: var(--slide-cream);
+  color: var(--slide-ink);
+  font-family: var(--font-body-family);
 }
 
 .slide {
