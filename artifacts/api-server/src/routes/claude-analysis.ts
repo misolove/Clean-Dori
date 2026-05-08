@@ -205,7 +205,7 @@ router.post("/claude-analysis", async (req, res): Promise<void> => {
 
     const message = await client.messages.create({
       model: "claude-sonnet-4-5",
-      max_tokens: 2000,
+      max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [
         {
