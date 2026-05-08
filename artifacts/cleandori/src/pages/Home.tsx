@@ -55,6 +55,87 @@ export default function Home() {
   const [analysisSource, setAnalysisSource] = useState<"mock" | "claude">("mock");
   const [claudeLoading, setClaudeLoading] = useState(false);
   const [claudeError, setClaudeError] = useState<string | null>(null);
+  const [afterImage, setAfterImage] = useState<string | null>(null);
+  const [afterSource, setAfterSource] = useState<"mock" | "gemini">("mock");
+  const [geminiLoading, setGeminiLoading] = useState(false);
+  const [geminiAttempts, setGeminiAttempts] = useState(0);
+  const [geminiError, setGeminiError] = useState<string | null>(null);
+
+  const GEMINI_MAX_ATTEMPTS = 3;
+  const GEMINI_PROMPT = `Edit the uploaded room photo into a realistic cleaned-up version.
+
+Preserve:
+- same window and curtains
+- same camera angle
+- same room layout
+- same guitar
+- same bed position
+- same boxes and storage area
+- same warm indoor lighting
+
+Change only:
+- reduce visible clutter
+- organize boxes into a stable stack
+- fold or group visible fabrics neatly
+- clear the walking path near the bed and guitar
+- make the floor more usable
+- keep the room realistic and lived-in
+
+Do not:
+- redesign the room
+- add new furniture
+- remove the guitar
+- remove all personal objects
+- make it look like a luxury interior
+- create a collage
+- add labels or text
+- make it unrealistically perfect
+
+The result should feel achievable after a 10-minute reset.`;
+
+  const handleGeminiPreview = async () => {
+    if (!uploadedImage) return;
+    if (geminiLoading) return;
+    if (geminiAttempts >= GEMINI_MAX_ATTEMPTS) return;
+    setGeminiLoading(true);
+    setGeminiError(null);
+    setGeminiAttempts((n) => n + 1);
+    const fallbackToMock = (msg: string) => {
+      setAfterImage(null);
+      setAfterSource("mock");
+      setGeminiError(msg);
+    };
+    try {
+      const imageBase64 = await toDataUri(uploadedImage);
+      const res = await fetch(
+        `${import.meta.env.BASE_URL}api/gemini-clean-preview`.replace(/\/{2,}/g, "/"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64, prompt: GEMINI_PROMPT }),
+        },
+      );
+      if (!res.ok) {
+        fallbackToMock("AI 생성에 실패해 기존 미리보기로 되돌렸어요.");
+        return;
+      }
+      const data = await res.json();
+      if (
+        data.source === "gemini" &&
+        typeof data.imageBase64 === "string" &&
+        data.imageBase64.startsWith("data:image/")
+      ) {
+        setAfterImage(data.imageBase64);
+        setAfterSource("gemini");
+      } else {
+        fallbackToMock("AI 생성에 실패해 기존 미리보기로 되돌렸어요.");
+      }
+    } catch {
+      fallbackToMock("요청에 실패해 기존 미리보기로 되돌렸어요.");
+    } finally {
+      setGeminiLoading(false);
+    }
+  };
 
   const BARRIER_LABELS: Record<string, string> = {
     visual_overload: "시각적 과부하",
@@ -83,6 +164,7 @@ export default function Home() {
 
   const handleClaudeAnalysis = async () => {
     if (!uploadedImage) return;
+    if (claudeLoading) return;
     setClaudeLoading(true);
     setClaudeError(null);
     try {
@@ -170,6 +252,10 @@ export default function Home() {
     setCheckedSteps([]);
     setAnalysisSource("mock");
     setClaudeError(null);
+    setAfterImage(null);
+    setAfterSource("mock");
+    setGeminiAttempts(0);
+    setGeminiError(null);
 
     const analysisRes = await mockAnalyzeRoomImage(demoBefore, "너무 막막해요");
     setAnalysis(analysisRes);
@@ -184,6 +270,13 @@ export default function Home() {
         if (event.target?.result) {
           setUploadedImage(event.target.result as string);
           setPreviewReady(true);
+          setAfterImage(null);
+          setAfterSource("mock");
+          setGeminiAttempts(0);
+          setGeminiError(null);
+          setAnalysisSource("mock");
+          setClaudeError(null);
+          setCheckedSteps([]);
           const analysisRes = await mockAnalyzeRoomImage(event.target.result as string, userState);
           setAnalysis(analysisRes);
           const missionRes = await mockGenerateCleaningMission(analysisRes, userState);
@@ -328,8 +421,34 @@ export default function Home() {
                         <span className="text-sm font-medium text-primary">정리 후 미리보기</span>
                       </div>
                       <div className="relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-primary/20 shadow-md shadow-primary/5">
-                        <img src={demoAfter} alt="After Preview" className="object-cover w-full h-full" />
+                        <img
+                          src={afterImage ?? demoAfter}
+                          alt="After Preview"
+                          className="object-cover w-full h-full"
+                        />
                         <div className="absolute inset-0 ring-1 ring-inset ring-primary/20 rounded-xl pointer-events-none"></div>
+                        <Badge
+                          variant="outline"
+                          className={`absolute top-2 right-2 text-[10px] uppercase tracking-wider bg-white/90 ${
+                            afterSource === "gemini"
+                              ? "border-primary/40 text-primary"
+                              : "border-muted-foreground/30 text-muted-foreground"
+                          }`}
+                        >
+                          {afterSource === "gemini" ? "Gemini" : "Mock"}
+                        </Badge>
+                        {geminiLoading && (
+                          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                            <div className="flex flex-col items-center gap-2 px-4 text-center">
+                              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                              <p className="text-xs text-foreground/80 leading-relaxed">
+                                정리 후 모습을 만드는 중이에요...
+                                <br />
+                                약 10~30초 걸릴 수 있어요.
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -337,18 +456,32 @@ export default function Home() {
                       정리 후 미리보기는 완벽한 결과 약속이 아니라, 지금 공간에서 어수선함만 줄인 동기부여용 예시입니다.
                     </p>
                     
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="block w-full">
-                            <Button disabled className="w-full rounded-xl">AI로 새 애프터 생성하기</Button>
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>준비 중</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Button
+                      onClick={handleGeminiPreview}
+                      disabled={
+                        !uploadedImage || geminiLoading || geminiAttempts >= GEMINI_MAX_ATTEMPTS
+                      }
+                      className="w-full rounded-xl"
+                      variant={afterSource === "gemini" ? "secondary" : "default"}
+                    >
+                      {geminiLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          생성 중...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          AI로 새 애프터 생성하기
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-[11px] text-muted-foreground text-center">
+                      세션당 최대 {GEMINI_MAX_ATTEMPTS}회 · 사용 {geminiAttempts}/{GEMINI_MAX_ATTEMPTS}
+                    </p>
+                    {geminiError && (
+                      <p className="text-xs text-muted-foreground text-center">{geminiError}</p>
+                    )}
                   </div>
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4 py-20">
