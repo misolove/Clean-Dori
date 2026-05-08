@@ -22,25 +22,80 @@ const mockAnalyzeRoomImage = async (image: string | null, userState: string) => 
   };
 };
 
-const mockGenerateCleaningMission = async (analysis: any, userState: string) => {
-  return {
-    title: "바닥 통로 30cm 회복하기",
+const MISSION_VARIANTS: Record<string, any> = {
+  "너무 막막해요": {
+    title: "딱 한 가지만 — 1분 회복",
+    duration: "1분",
+    startingZone: "눈에 가장 먼저 들어오는 평면 한 곳",
+    reason: "전체를 보지 않고, 시야 한 칸만 회복하면 다음이 보입니다.",
+    steps: [
+      { id: 1, text: "타이머 1분 맞추기" },
+      { id: 2, text: "눈에 가장 거슬리는 물건 딱 한 개만 제자리로 옮기기" },
+      { id: 3, text: "1분이 끝나면 바로 멈추고 잘 했다고 말하기" },
+    ],
+    avoid: ["오늘 안에 더 하려고 하기", "다른 구역까지 둘러보기", "버릴지 말지 판단하기"],
+    ifThenRule: "만약 1분 안에 끝났다면, 한 번 더 하지 말고 오늘은 여기서 멈춘다.",
+  },
+  "에너지가 낮아요": {
+    title: "바닥 통로 30cm 회복하기 — 3분 미션",
     duration: "3분",
-    startingZone: "침대 앞 / 기타 옆 바닥 통로",
-    reason: "정리 후 미리보기에서 가장 먼저 달라져 보이는 구역입니다.",
+    startingZone: "발이 자주 닿는 바닥 한 줄",
+    reason: "에너지가 낮은 날에는 가장 자주 지나는 길만 살짝 넓혀도 충분합니다.",
     steps: [
       { id: 1, text: "바닥에 있는 종이·빈 포장재처럼 명백한 것만 한곳에 모으기" },
-      { id: 2, text: "박스 밖으로 나온 작은 물건 3개만 박스 안에 넣기" },
-      { id: 3, text: "기타 주변 통로가 보이면 바로 멈추기" }
+      { id: 2, text: "통로 위 작은 물건 3개만 가까운 곳으로 옮기기" },
+      { id: 3, text: "발 한 걸음만큼 길이 트이면 바로 멈추기" },
     ],
-    avoid: [
-      "박스 전부 열기",
-      "추억 물건 판단하기",
-      "옷 정리 시작하기",
-      "방 전체를 완성하려고 하기"
+    avoid: ["박스 열어보기", "옷 정리 시작하기", "방 전체를 완성하려고 하기"],
+    ifThenRule: "만약 3분 안에 다 끝났다면, 더 하지 않고 물 한 잔 마시며 쉰다.",
+  },
+  "조금은 가능해요": {
+    title: "한 평면 비우기 — 5분 회복",
+    duration: "5분",
+    startingZone: "책상·식탁·협탁 중 가장 자주 쓰는 평면 하나",
+    reason: "평면 한 곳이 트이면 그 위의 다음 행동이 자연스럽게 시작됩니다.",
+    steps: [
+      { id: 1, text: "선택한 평면 위 물건을 모두 한쪽으로 모으기" },
+      { id: 2, text: "그중 '여기에 두는 게 자연스러운 것'만 다시 올려두기" },
+      { id: 3, text: "나머지는 바닥의 임시 자리에 그대로 두고 평면을 한 번 닦기" },
+      { id: 4, text: "5분이 지나면 마무리하고 사진 한 장 남기기" },
     ],
-    ifThenRule: "만약 바닥에 새 물건을 내려놓게 되면, 그때는 먼저 '보류 박스' 하나에만 넣는다."
-  };
+    avoid: ["서랍·박스 안까지 손대기", "버릴지 말지 결정하기", "다른 평면까지 손대기"],
+    ifThenRule: "만약 도중에 의미를 따지게 되면, 그 물건은 일단 옆에 두고 다음 물건으로 넘어간다.",
+  },
+  "오늘은 해볼 만해요": {
+    title: "10분 루틴 — 한 구역 회복",
+    duration: "10분",
+    startingZone: "오늘 가장 자주 머무는 구역 하나 (예: 침대 옆 또는 책상)",
+    reason: "한 구역만 끝까지 다듬어 두면, 다음 날의 시작점이 됩니다.",
+    steps: [
+      { id: 1, text: "타이머 10분 맞추기" },
+      { id: 2, text: "구역 안 바닥의 명백한 것 먼저 치우기 (3분)" },
+      { id: 3, text: "평면 위 물건을 같은 종류끼리 모으기 (3분)" },
+      { id: 4, text: "모은 것 중 자주 쓰는 것만 다시 자리 잡기 (3분)" },
+      { id: 5, text: "타이머가 울리면 바로 멈추고 사진 한 장 남기기" },
+    ],
+    avoid: ["10분을 넘겨서 계속하기", "옆 구역까지 확장하기", "오늘 안에 끝내려고 하기"],
+    ifThenRule: "만약 10분이 지나도 미련이 남으면, 내일 같은 시간 같은 구역에서 한 번 더 한다.",
+  },
+  "버릴지 결정이 어려워요": {
+    title: "보류 박스 만들기 — 결정 미루기",
+    duration: "5분",
+    startingZone: "빈 박스나 종이가방 하나를 둘 수 있는 자리",
+    reason: "버릴지 말지 지금 정하지 않아도 됩니다. 결정을 미룰 자리만 만들면 충분합니다.",
+    steps: [
+      { id: 1, text: "빈 박스·가방·바구니 한 개를 '보류'라고 정해 두기" },
+      { id: 2, text: "지금 자리에 두기 애매한 물건만 그 안에 담기" },
+      { id: 3, text: "박스가 절반 차거나 5분이 지나면 멈추기" },
+      { id: 4, text: "박스 위에 오늘 날짜 적어 두기" },
+    ],
+    avoid: ["박스 안에서 다시 골라내기", "버릴지 말지 지금 결정하기", "여러 개의 보류 박스 만들기"],
+    ifThenRule: "만약 한 달 동안 박스를 한 번도 다시 열지 않았다면, 그때 한 번에 정리한다.",
+  },
+};
+
+const mockGenerateCleaningMission = async (analysis: any, userState: string) => {
+  return MISSION_VARIANTS[userState] ?? MISSION_VARIANTS["에너지가 낮아요"];
 };
 
 export default function Home() {
@@ -280,6 +335,26 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
       reader.readAsDataURL(e.target.files[0]);
     }
   };
+
+  // Re-run mock mission whenever the user changes their state radio.
+  // Only applies to mock-sourced analyses — Claude-generated missions stay
+  // as-is to avoid silently overwriting a live AI result.
+  useEffect(() => {
+    if (!analysis) return;
+    if (analysisSource !== "mock") return;
+    let cancelled = false;
+    (async () => {
+      const next = await mockGenerateCleaningMission(analysis, userState);
+      if (!cancelled) {
+        setMission(next);
+        setCheckedSteps([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userState]);
 
   const handleToggleStep = (id: number) => {
     setCheckedSteps(prev => 
