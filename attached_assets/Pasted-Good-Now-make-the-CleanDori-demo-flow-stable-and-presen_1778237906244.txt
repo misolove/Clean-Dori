@@ -1,0 +1,109 @@
+Good. Now make the CleanDori demo flow stable and presentation-ready.
+
+Do not add Claude API or Gemini API yet.
+Do not add login.
+Do not add database.
+Do not add extra pages.
+Focus only on making the current MVP reliable for judging.
+
+Main goal:
+The app must work perfectly in Presentation Demo Mode.
+
+Please check and fix:
+
+1. Presentation Demo Mode
+- Add a clear button on the landing page:
+  “Presentation Demo Mode”
+- When clicked, it should automatically:
+  1. Use the demo before image
+  2. Use the demo after image / clean preview image
+  3. Select user state: “너무 막막해요”
+  4. Show Before / Clean Preview
+  5. Show Dual Coach Analysis
+  6. Show the 3-minute mission
+  7. Enable checklist progress
+  8. Show completion message when all steps are checked
+
+2. Fixed demo images
+Use these labels in the UI:
+- Left: 현재 모습
+- Right: 정리 후 미리보기
+
+If real image files are not available yet, use placeholder cards, but make the structure ready for:
+- before_demo_room.jpeg
+- after_demo_room.jpeg
+
+Add a note:
+“정리 후 미리보기는 완벽한 결과 약속이 아니라, 지금 공간에서 어수선함만 줄인 동기부여용 예시입니다.”
+
+3. Dual Coach Analysis
+Show this analysis in demo mode:
+
+Possible organizing barriers:
+- 시각적 과부하
+- 시작점 상실
+- 결정 피로
+
+Gentle summary:
+“여러 물건이 섞여 있어서 어디서부터 시작할지 막막하게 느껴질 수 있어요. 전체를 치우지 않아도 괜찮아요. 지금은 한 구역만 회복해볼게요.”
+
+Important:
+Do not say ADHD, depression, OCD, hoarding disorder, anxiety, or any diagnosis.
+Use only “실행 장벽” or “정리를 어렵게 만드는 요인”.
+
+4. Mission Dashboard
+Use this exact default mission:
+
+Title:
+바닥 통로 30cm 회복하기
+
+Duration:
+3분
+
+Starting zone:
+침대 앞 / 기타 옆 바닥 통로
+
+Why this zone:
+정리 후 미리보기에서 가장 먼저 달라져 보이는 구역입니다.
+
+Steps:
+1. 바닥에 있는 종이·빈 포장재처럼 명백한 것만 한곳에 모으기
+2. 박스 밖으로 나온 작은 물건 3개만 박스 안에 넣기
+3. 기타 주변 통로가 보이면 바로 멈추기
+
+Avoid for now:
+- 박스 전부 열기
+- 추억 물건 판단하기
+- 옷 정리 시작하기
+- 방 전체를 완성하려고 하기
+
+If-Then rule:
+만약 바닥에 새 물건을 내려놓게 되면, 그때는 먼저 “보류 박스” 하나에만 넣는다.
+
+5. Checklist
+- User can check each step.
+- Show progress percentage.
+- When complete, show:
+
+“좋아요. 통로 하나를 회복했어요.
+완벽하지 않아도 괜찮아요.
+오늘은 시작했고, 그게 핵심이에요.”
+
+6. UI polish
+Make the desktop layout easy to understand:
+- Left panel: upload / user state
+- Center panel: before / clean preview
+- Right panel: analysis / mission checklist
+
+Use:
+- warm green and cream palette
+- rounded cards
+- clear Korean copy
+- big visible CTA buttons
+- soft, non-judgmental tone
+
+7. Final check
+The app must work without API keys.
+No runtime errors.
+No broken buttons.
+Presentation Demo Mode must be reliable.

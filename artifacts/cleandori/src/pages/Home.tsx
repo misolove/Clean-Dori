@@ -58,7 +58,8 @@ export default function Home() {
     setUploadedImage(demoBefore);
     setUserState("너무 막막해요");
     setPreviewReady(true);
-    
+    setCheckedSteps([]);
+
     const analysisRes = await mockAnalyzeRoomImage(demoBefore, "너무 막막해요");
     setAnalysis(analysisRes);
     const missionRes = await mockGenerateCleaningMission(analysisRes, "너무 막막해요");
@@ -221,8 +222,8 @@ export default function Home() {
                       </div>
                     </div>
                     
-                    <p className="text-sm text-muted-foreground text-center bg-muted/50 p-3 rounded-lg">
-                      완벽한 인테리어가 아니라, 지금 공간에서 어수선함만 줄인 동기부여용 미리보기입니다.
+                    <p className="text-sm text-muted-foreground text-center bg-muted/50 p-3 rounded-lg leading-relaxed">
+                      정리 후 미리보기는 완벽한 결과 약속이 아니라, 지금 공간에서 어수선함만 줄인 동기부여용 예시입니다.
                     </p>
                     
                     <TooltipProvider>
