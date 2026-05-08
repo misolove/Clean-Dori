@@ -1,0 +1,31 @@
+kind = "slides"
+previewPath = "/cleandori-deck/"
+title = "CleanDori 발표 슬라이드"
+version = "1.0.0"
+id = "artifacts/cleandori-deck"
+router = "path"
+
+[[integratedSkills]]
+name = "slides"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/cleandori-deck/" ]
+localPort = 19161
+
+[services.development]
+run = "pnpm --filter @workspace/cleandori-deck run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/cleandori-deck", "run", "build" ]
+publicDir = "artifacts/cleandori-deck/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19161"
+BASE_PATH = "/cleandori-deck/"
