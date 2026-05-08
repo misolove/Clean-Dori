@@ -62,36 +62,30 @@ export default function Home() {
   const [geminiError, setGeminiError] = useState<string | null>(null);
 
   const GEMINI_MAX_ATTEMPTS = 3;
-  const GEMINI_PROMPT = `Edit the uploaded room photo into a realistic cleaned-up version.
+  const GEMINI_PROMPT = `You are editing the uploaded photo of a real personal space. Output ONE edited image (not the original) that shows the same space after a realistic 10-minute tidy-up.
 
-Preserve:
-- same window and curtains
-- same camera angle
-- same room layout
-- same guitar
-- same bed position
-- same boxes and storage area
-- same warm indoor lighting
+Preserve from the input photo:
+- same camera angle, framing, and perspective
+- same room or area, same walls, floor, and furniture
+- same lighting, color tone, and time of day
+- the same major personal objects already visible (do not remove what the person owns)
 
-Change only:
-- reduce visible clutter
-- organize boxes into a stable stack
-- fold or group visible fabrics neatly
-- clear the walking path near the bed and guitar
-- make the floor more usable
-- keep the room realistic and lived-in
+Change only these things:
+- reduce visible clutter on the floor, bed, desk, or other surfaces
+- group or stack loose items into neat piles, baskets, or boxes
+- fold or align visible fabrics, clothes, or bedding
+- clear obvious walking paths and usable surfaces
+- keep the result realistic and lived-in, not staged
 
-Do not:
-- redesign the room
-- add new furniture
-- remove the guitar
-- remove all personal objects
-- make it look like a luxury interior
-- create a collage
-- add labels or text
-- make it unrealistically perfect
+Do NOT:
+- redesign the space, change the layout, or add new furniture
+- remove the person's belongings; only reorganize them
+- make it look like a luxury showroom or magazine photo
+- create a collage, before/after split, grid, or multiple panels
+- add any text, labels, watermarks, arrows, or UI overlays
+- output the input image unchanged — you MUST make visible tidying changes
 
-The result should feel achievable after a 10-minute reset.`;
+Return exactly one edited photographic image of the same space, post-tidy.`;
 
   const handleGeminiPreview = async () => {
     if (!uploadedImage) return;

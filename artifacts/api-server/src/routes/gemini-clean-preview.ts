@@ -76,6 +76,10 @@ router.post("/gemini-clean-preview", async (req, res): Promise<void> => {
       throw new Error("No image returned from Gemini");
     }
 
+    if (outImage.data === data) {
+      throw new Error("Gemini returned the input image unchanged");
+    }
+
     res.json({
       source: "gemini",
       imageBase64: `data:${outImage.mimeType};base64,${outImage.data}`,
