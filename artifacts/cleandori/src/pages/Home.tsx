@@ -13,7 +13,7 @@ import demoBefore from "@assets/brett-jordan-bSoV4nbrkzA-unsplash_1778236944319.
 import demoAfter from "@assets/a_tidy_softly_lit_interior_room_scene_viewed_stra_1778236956570.png";
 
 // Mock Architecture for API Swaps
-// NOTE: Claude (room analysis + mission) and Gemini (preview image) will plug in later. DO NOT implement real API calls here.
+// NOTE: Claude (room analysis + mission) and OpenAI (preview image) will plug in later. DO NOT implement real API calls here.
 
 const mockAnalyzeRoomImage = async (image: string | null, userState: string) => {
   return {
@@ -56,13 +56,13 @@ export default function Home() {
   const [claudeLoading, setClaudeLoading] = useState(false);
   const [claudeError, setClaudeError] = useState<string | null>(null);
   const [afterImage, setAfterImage] = useState<string | null>(null);
-  const [afterSource, setAfterSource] = useState<"mock" | "gemini">("mock");
-  const [geminiLoading, setGeminiLoading] = useState(false);
-  const [geminiAttempts, setGeminiAttempts] = useState(0);
-  const [geminiError, setGeminiError] = useState<string | null>(null);
+  const [afterSource, setAfterSource] = useState<"mock" | "openai">("mock");
+  const [openaiLoading, setOpenAILoading] = useState(false);
+  const [openaiAttempts, setOpenAIAttempts] = useState(0);
+  const [openaiError, setOpenAIError] = useState<string | null>(null);
 
-  const GEMINI_MAX_ATTEMPTS = 3;
-  const GEMINI_PROMPT = `You are editing the uploaded photo of a real personal space. Output ONE edited image (not the original) that shows the same space after a realistic 10-minute tidy-up.
+  const OPENAI_MAX_ATTEMPTS = 3;
+  const OPENAI_PROMPT = `You are editing the uploaded photo of a real personal space. Output ONE edited image (not the original) that shows the same space after a realistic 10-minute tidy-up.
 
 Preserve from the input photo:
 - same camera angle, framing, and perspective
@@ -87,26 +87,26 @@ Do NOT:
 
 Return exactly one edited photographic image of the same space, post-tidy.`;
 
-  const handleGeminiPreview = async () => {
+  const handleOpenAIPreview = async () => {
     if (!uploadedImage) return;
-    if (geminiLoading) return;
-    if (geminiAttempts >= GEMINI_MAX_ATTEMPTS) return;
-    setGeminiLoading(true);
-    setGeminiError(null);
-    setGeminiAttempts((n) => n + 1);
+    if (openaiLoading) return;
+    if (openaiAttempts >= OPENAI_MAX_ATTEMPTS) return;
+    setOpenAILoading(true);
+    setOpenAIError(null);
+    setOpenAIAttempts((n) => n + 1);
     const fallbackToMock = (msg: string) => {
       setAfterImage(null);
       setAfterSource("mock");
-      setGeminiError(msg);
+      setOpenAIError(msg);
     };
     try {
       const imageBase64 = await toDataUri(uploadedImage);
       const res = await fetch(
-        `${import.meta.env.BASE_URL}api/gemini-clean-preview`.replace(/\/{2,}/g, "/"),
+        `${import.meta.env.BASE_URL}api/openai-clean-preview`.replace(/\/{2,}/g, "/"),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageBase64, prompt: GEMINI_PROMPT }),
+          body: JSON.stringify({ imageBase64, prompt: OPENAI_PROMPT }),
         },
       );
       if (!res.ok) {
@@ -115,19 +115,19 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
       }
       const data = await res.json();
       if (
-        data.source === "gemini" &&
+        data.source === "openai" &&
         typeof data.imageBase64 === "string" &&
         data.imageBase64.startsWith("data:image/")
       ) {
         setAfterImage(data.imageBase64);
-        setAfterSource("gemini");
+        setAfterSource("openai");
       } else {
         fallbackToMock("AI 생성에 실패해 기존 미리보기로 되돌렸어요.");
       }
     } catch {
       fallbackToMock("요청에 실패해 기존 미리보기로 되돌렸어요.");
     } finally {
-      setGeminiLoading(false);
+      setOpenAILoading(false);
     }
   };
 
@@ -248,8 +248,8 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
     setClaudeError(null);
     setAfterImage(null);
     setAfterSource("mock");
-    setGeminiAttempts(0);
-    setGeminiError(null);
+    setOpenAIAttempts(0);
+    setOpenAIError(null);
 
     const analysisRes = await mockAnalyzeRoomImage(demoBefore, "너무 막막해요");
     setAnalysis(analysisRes);
@@ -266,8 +266,8 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
           setPreviewReady(true);
           setAfterImage(null);
           setAfterSource("mock");
-          setGeminiAttempts(0);
-          setGeminiError(null);
+          setOpenAIAttempts(0);
+          setOpenAIError(null);
           setAnalysisSource("mock");
           setClaudeError(null);
           setCheckedSteps([]);
@@ -417,7 +417,7 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
                       {(() => {
                         const isDemo = uploadedImage === demoBefore;
                         const previewSrc = afterImage ?? (isDemo ? demoAfter : uploadedImage);
-                        const showHint = !afterImage && !isDemo && !geminiLoading;
+                        const showHint = !afterImage && !isDemo && !openaiLoading;
                         const showBadge = !!afterImage || isDemo;
                         return (
                           <div className="relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-primary/20 shadow-md shadow-primary/5">
@@ -431,31 +431,31 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
                               <Badge
                                 variant="outline"
                                 className={`absolute top-2 right-2 text-[10px] uppercase tracking-wider bg-white/90 ${
-                                  afterSource === "gemini"
+                                  afterSource === "openai"
                                     ? "border-primary/40 text-primary"
                                     : "border-muted-foreground/30 text-muted-foreground"
                                 }`}
                               >
-                                {afterSource === "gemini" ? "Gemini" : "Mock"}
+                                {afterSource === "openai" ? "OpenAI" : "Mock"}
                               </Badge>
                             )}
                             {showHint && (
                               <div className="absolute inset-0 bg-background/75 backdrop-blur-sm flex items-center justify-center rounded-xl">
                                 <p className="text-xs text-foreground/85 text-center px-5 leading-relaxed max-w-[260px]">
-                                  {geminiError
-                                    ? `${geminiError} 아래 버튼으로 다시 시도해 보세요.`
+                                  {openaiError
+                                    ? `${openaiError} 아래 버튼으로 다시 시도해 보세요.`
                                     : "아래 ‘AI로 새 애프터 생성하기’ 버튼을 누르면 이 사진의 정리 후 미리보기를 만들어요."}
                                 </p>
                               </div>
                             )}
-                            {geminiLoading && (
+                            {openaiLoading && (
                               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-xl">
                                 <div className="flex flex-col items-center gap-2 px-4 text-center">
                                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
                                   <p className="text-xs text-foreground/80 leading-relaxed">
                                     정리 후 모습을 만드는 중이에요...
                                     <br />
-                                    약 10~30초 걸릴 수 있어요.
+                                    약 30~60초 걸릴 수 있어요.
                                   </p>
                                 </div>
                               </div>
@@ -470,14 +470,14 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
                     </p>
                     
                     <Button
-                      onClick={handleGeminiPreview}
+                      onClick={handleOpenAIPreview}
                       disabled={
-                        !uploadedImage || geminiLoading || geminiAttempts >= GEMINI_MAX_ATTEMPTS
+                        !uploadedImage || openaiLoading || openaiAttempts >= OPENAI_MAX_ATTEMPTS
                       }
                       className="w-full rounded-xl"
-                      variant={afterSource === "gemini" ? "secondary" : "default"}
+                      variant={afterSource === "openai" ? "secondary" : "default"}
                     >
-                      {geminiLoading ? (
+                      {openaiLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           생성 중...
@@ -490,10 +490,10 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
                       )}
                     </Button>
                     <p className="text-[11px] text-muted-foreground text-center">
-                      세션당 최대 {GEMINI_MAX_ATTEMPTS}회 · 사용 {geminiAttempts}/{GEMINI_MAX_ATTEMPTS}
+                      세션당 최대 {OPENAI_MAX_ATTEMPTS}회 · 사용 {openaiAttempts}/{OPENAI_MAX_ATTEMPTS}
                     </p>
-                    {geminiError && (
-                      <p className="text-xs text-muted-foreground text-center">{geminiError}</p>
+                    {openaiError && (
+                      <p className="text-xs text-muted-foreground text-center">{openaiError}</p>
                     )}
                   </div>
                 ) : (
