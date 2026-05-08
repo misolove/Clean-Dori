@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, CheckCircle2, ChevronRight, Play } from "lucide-react";
+import { UploadCloud, CheckCircle2, ChevronRight, Play, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -52,6 +52,115 @@ export default function Home() {
   const [analysis, setAnalysis] = useState<any>(null);
   const [mission, setMission] = useState<any>(null);
   const [checkedSteps, setCheckedSteps] = useState<number[]>([]);
+  const [analysisSource, setAnalysisSource] = useState<"mock" | "claude">("mock");
+  const [claudeLoading, setClaudeLoading] = useState(false);
+  const [claudeError, setClaudeError] = useState<string | null>(null);
+
+  const BARRIER_LABELS: Record<string, string> = {
+    visual_overload: "시각적 과부하",
+    no_clear_start: "시작점 상실",
+    decision_fatigue: "결정 피로",
+    low_energy: "낮은 에너지",
+    shame_avoidance: "회피하고 싶은 마음",
+    attachment_difficulty: "물건 보내기 어려움",
+    perfectionism: "완벽주의",
+    maintenance_failure: "유지의 어려움",
+    shared_space_ambiguity: "공유 공간 모호함",
+    safety_risk: "안전 우려",
+  };
+
+  const toDataUri = async (src: string): Promise<string> => {
+    if (src.startsWith("data:")) return src;
+    const res = await fetch(src);
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Failed to read image"));
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const handleClaudeAnalysis = async () => {
+    if (!uploadedImage) return;
+    setClaudeLoading(true);
+    setClaudeError(null);
+    try {
+      const imageBase64 = await toDataUri(uploadedImage);
+      const res = await fetch(
+        `${import.meta.env.BASE_URL}api/claude-analysis`.replace(/\/{2,}/g, "/"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64, userState }),
+        },
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      const barriersArr = Array.isArray(data.possible_barriers) ? data.possible_barriers : [];
+      const top = barriersArr[0] ?? null;
+      const barrierLabels: string[] = barriersArr
+        .slice(0, 4)
+        .map((b: any) => BARRIER_LABELS[b?.type] ?? b?.type ?? "");
+
+      setAnalysis({
+        barriers: barrierLabels.filter(Boolean),
+        summary: data.gentle_summary ?? "",
+        topBarrierLabel: top ? BARRIER_LABELS[top.type] ?? top.type : null,
+        topBarrierReason: top?.reason ?? null,
+        selfCheckQuestion: data.self_check_questions?.[0] ?? null,
+        safetyMessage:
+          data.safety && data.safety.risk_level !== "normal" ? data.safety.message : null,
+        safetyRiskLevel: data.safety?.risk_level ?? "normal",
+        disclaimer: data.disclaimer ?? null,
+      });
+
+      const rawThree = data.missions?.["3_min"];
+      const threeMin: string[] = Array.isArray(rawThree)
+        ? rawThree.filter((s: unknown): s is string => typeof s === "string")
+        : [];
+      const avoidArr: string[] = Array.isArray(data.avoid)
+        ? data.avoid.filter((s: unknown): s is string => typeof s === "string")
+        : [];
+      const cuesArr: string[] = Array.isArray(data.visible_cues)
+        ? data.visible_cues.filter((s: unknown): s is string => typeof s === "string")
+        : [];
+      if (threeMin.length > 0) {
+        setMission({
+          title: "AI가 제안한 3분 미션",
+          duration: "3분",
+          startingZone: cuesArr[0] ?? "AI가 제안한 시작 구역",
+          reason:
+            (typeof data.preview_image_role === "string" && data.preview_image_role) ||
+            "정리 후 미리보기에서 가장 먼저 달라져 보이는 구역입니다.",
+          steps: threeMin.map((text, i) => ({ id: i + 1, text })),
+          avoid: avoidArr,
+          ifThenRule: typeof data.if_then_rule === "string" ? data.if_then_rule : "",
+        });
+        setCheckedSteps([]);
+      }
+
+      setAnalysisSource(data.source === "claude" ? "claude" : "mock");
+      if (data.source !== "claude") {
+        setClaudeError("Claude 응답을 사용할 수 없어 mock 분석으로 대체했어요.");
+      }
+    } catch (err) {
+      setClaudeError("분석 요청에 실패해 mock 분석으로 되돌렸어요.");
+      try {
+        const fallbackAnalysis = await mockAnalyzeRoomImage(uploadedImage, userState);
+        setAnalysis(fallbackAnalysis);
+        const fallbackMission = await mockGenerateCleaningMission(fallbackAnalysis, userState);
+        setMission(fallbackMission);
+        setCheckedSteps([]);
+        setAnalysisSource("mock");
+      } catch {
+        // keep existing state if even mock fails
+      }
+    } finally {
+      setClaudeLoading(false);
+    }
+  };
   
   const handleStartDemo = async () => {
     setHasStarted(true);
@@ -59,6 +168,8 @@ export default function Home() {
     setUserState("너무 막막해요");
     setPreviewReady(true);
     setCheckedSteps([]);
+    setAnalysisSource("mock");
+    setClaudeError(null);
 
     const analysisRes = await mockAnalyzeRoomImage(demoBefore, "너무 막막해요");
     setAnalysis(analysisRes);
@@ -256,11 +367,27 @@ export default function Home() {
             {analysis && (
               <Card className="border-primary/10 shadow-sm rounded-2xl bg-primary/5">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center">
-                    정리 전문가 + 비판단적 행동 코치
-                  </CardTitle>
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="text-lg">정리 전문가 + 비판단적 행동 코치</CardTitle>
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] uppercase tracking-wider ${
+                        analysisSource === "claude"
+                          ? "border-primary/40 text-primary"
+                          : "border-muted-foreground/30 text-muted-foreground"
+                      }`}
+                    >
+                      {analysisSource === "claude" ? "Claude" : "Mock"}
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {analysis.safetyMessage && (
+                    <div className="flex gap-2 items-start bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-sm text-foreground">
+                      <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                      <span>{analysis.safetyMessage}</span>
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-2">
                     {analysis.barriers.map((b: string) => (
                       <Badge key={b} variant="secondary" className="bg-white/60 hover:bg-white text-secondary-foreground border-primary/10">
@@ -268,9 +395,52 @@ export default function Home() {
                       </Badge>
                     ))}
                   </div>
+                  {analysis.topBarrierReason && (
+                    <div className="bg-white/60 rounded-lg p-3 border border-primary/10 space-y-1">
+                      <div className="text-xs font-semibold text-primary uppercase tracking-wide">
+                        가장 가능성 높은 실행 장벽{analysis.topBarrierLabel ? ` · ${analysis.topBarrierLabel}` : ""}
+                      </div>
+                      <p className="text-sm leading-relaxed text-foreground/80">
+                        {analysis.topBarrierReason}
+                      </p>
+                    </div>
+                  )}
                   <p className="text-sm leading-relaxed text-foreground/80 font-medium">
                     "{analysis.summary}"
                   </p>
+                  {analysis.selfCheckQuestion && (
+                    <div className="bg-secondary/60 rounded-lg p-3 border border-border text-sm">
+                      <span className="font-semibold text-primary mr-1">자기 체크:</span>
+                      {analysis.selfCheckQuestion}
+                    </div>
+                  )}
+
+                  <Button
+                    onClick={handleClaudeAnalysis}
+                    disabled={!uploadedImage || claudeLoading}
+                    className="w-full rounded-xl"
+                    variant={analysisSource === "claude" ? "secondary" : "default"}
+                  >
+                    {claudeLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        분석 중...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        {analysisSource === "claude" ? "다시 분석하기" : "Claude로 실행 장벽 분석하기"}
+                      </>
+                    )}
+                  </Button>
+                  {claudeError && (
+                    <p className="text-xs text-muted-foreground text-center">{claudeError}</p>
+                  )}
+                  {analysis.disclaimer && (
+                    <p className="text-[11px] text-muted-foreground text-center leading-relaxed pt-1">
+                      {analysis.disclaimer}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             )}
