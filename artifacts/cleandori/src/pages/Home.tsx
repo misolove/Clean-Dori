@@ -414,36 +414,55 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
                       <div className="flex justify-between items-center px-1">
                         <span className="text-sm font-medium text-primary">정리 후 미리보기</span>
                       </div>
-                      <div className="relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-primary/20 shadow-md shadow-primary/5">
-                        <img
-                          src={afterImage ?? demoAfter}
-                          alt="After Preview"
-                          className="object-cover w-full h-full"
-                        />
-                        <div className="absolute inset-0 ring-1 ring-inset ring-primary/20 rounded-xl pointer-events-none"></div>
-                        <Badge
-                          variant="outline"
-                          className={`absolute top-2 right-2 text-[10px] uppercase tracking-wider bg-white/90 ${
-                            afterSource === "gemini"
-                              ? "border-primary/40 text-primary"
-                              : "border-muted-foreground/30 text-muted-foreground"
-                          }`}
-                        >
-                          {afterSource === "gemini" ? "Gemini" : "Mock"}
-                        </Badge>
-                        {geminiLoading && (
-                          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-xl">
-                            <div className="flex flex-col items-center gap-2 px-4 text-center">
-                              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                              <p className="text-xs text-foreground/80 leading-relaxed">
-                                정리 후 모습을 만드는 중이에요...
-                                <br />
-                                약 10~30초 걸릴 수 있어요.
-                              </p>
-                            </div>
+                      {(() => {
+                        const isDemo = uploadedImage === demoBefore;
+                        const previewSrc = afterImage ?? (isDemo ? demoAfter : uploadedImage);
+                        const showHint = !afterImage && !isDemo && !geminiLoading;
+                        const showBadge = !!afterImage || isDemo;
+                        return (
+                          <div className="relative aspect-[4/3] rounded-xl overflow-hidden border-2 border-primary/20 shadow-md shadow-primary/5">
+                            <img
+                              src={previewSrc}
+                              alt="After Preview"
+                              className="object-cover w-full h-full"
+                            />
+                            <div className="absolute inset-0 ring-1 ring-inset ring-primary/20 rounded-xl pointer-events-none"></div>
+                            {showBadge && (
+                              <Badge
+                                variant="outline"
+                                className={`absolute top-2 right-2 text-[10px] uppercase tracking-wider bg-white/90 ${
+                                  afterSource === "gemini"
+                                    ? "border-primary/40 text-primary"
+                                    : "border-muted-foreground/30 text-muted-foreground"
+                                }`}
+                              >
+                                {afterSource === "gemini" ? "Gemini" : "Mock"}
+                              </Badge>
+                            )}
+                            {showHint && (
+                              <div className="absolute inset-0 bg-background/75 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                                <p className="text-xs text-foreground/85 text-center px-5 leading-relaxed max-w-[260px]">
+                                  {geminiError
+                                    ? `${geminiError} 아래 버튼으로 다시 시도해 보세요.`
+                                    : "아래 ‘AI로 새 애프터 생성하기’ 버튼을 누르면 이 사진의 정리 후 미리보기를 만들어요."}
+                                </p>
+                              </div>
+                            )}
+                            {geminiLoading && (
+                              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                                <div className="flex flex-col items-center gap-2 px-4 text-center">
+                                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                  <p className="text-xs text-foreground/80 leading-relaxed">
+                                    정리 후 모습을 만드는 중이에요...
+                                    <br />
+                                    약 10~30초 걸릴 수 있어요.
+                                  </p>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                        );
+                      })()}
                     </div>
                     
                     <p className="text-sm text-muted-foreground text-center bg-muted/50 p-3 rounded-lg leading-relaxed">
