@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "Lg0TTjTN7W3P-utXiu3T3"
@@ -12,3 +11,15 @@ id = "XPpKPDuuYVXeRGeGut3Qy"
 uri = "file://artifacts/cleandori/src/assets/demo-after.png"
 type = "image"
 title = "Clean room demo after"
+
+[[outputs]]
+id = "qOQhoHi9khZXCgFLBU53o"
+uri = "file://.local/outputs/Clean-Dori.pdf"
+type = "pdf"
+title = "Clean Dori.pdf"
+
+[[outputs]]
+id = "9bm6DztGsdrD3kV4navJy"
+uri = "file://.local/outputs/Clean-Dori.pptx"
+type = "slides"
+title = "Clean Dori.pptx"
