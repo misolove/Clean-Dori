@@ -312,27 +312,67 @@ Return exactly one edited photographic image of the same space, post-tidy.`;
     setMission(missionRes);
   };
   
-  const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+  const resizeImageFile = (file: File, maxDim = 1600, quality = 0.85): Promise<string> => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = async (event) => {
-        if (event.target?.result) {
-          setUploadedImage(event.target.result as string);
-          setPreviewReady(true);
-          setAfterImage(null);
-          setAfterSource("mock");
-          setOpenAIAttempts(0);
-          setOpenAIError(null);
-          setAnalysisSource("mock");
-          setClaudeError(null);
-          setCheckedSteps([]);
-          const analysisRes = await mockAnalyzeRoomImage(event.target.result as string, userState);
-          setAnalysis(analysisRes);
-          const missionRes = await mockGenerateCleaningMission(analysisRes, userState);
-          setMission(missionRes);
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        if (!dataUrl) {
+          reject(new Error("Failed to read image"));
+          return;
         }
+        const img = new Image();
+        img.onload = () => {
+          const { width, height } = img;
+          const scale = Math.min(1, maxDim / Math.max(width, height));
+          const targetW = Math.round(width * scale);
+          const targetH = Math.round(height * scale);
+          const canvas = document.createElement("canvas");
+          canvas.width = targetW;
+          canvas.height = targetH;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(dataUrl);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, targetW, targetH);
+          try {
+            const out = canvas.toDataURL("image/jpeg", quality);
+            resolve(out);
+          } catch {
+            resolve(dataUrl);
+          }
+        };
+        img.onerror = () => reject(new Error("Failed to decode image"));
+        img.src = dataUrl;
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.onerror = () => reject(new Error("Failed to read image"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const resized = await resizeImageFile(file);
+      setUploadedImage(resized);
+      setPreviewReady(true);
+      setAfterImage(null);
+      setAfterSource("mock");
+      setOpenAIAttempts(0);
+      setOpenAIError(null);
+      setAnalysisSource("mock");
+      setClaudeError(null);
+      setCheckedSteps([]);
+      const analysisRes = await mockAnalyzeRoomImage(resized, userState);
+      setAnalysis(analysisRes);
+      const missionRes = await mockGenerateCleaningMission(analysisRes, userState);
+      setMission(missionRes);
+    } catch (err) {
+      setClaudeError(err instanceof Error ? err.message : "이미지를 불러오지 못했습니다.");
+    } finally {
+      e.target.value = "";
     }
   };
 
